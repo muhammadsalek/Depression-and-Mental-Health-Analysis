@@ -1,0 +1,12 @@
+"0","data$Gender <- factor(data$Gender, levels = c(""Male"", ""Female""))"
+"0","data$Sleep.Duration <- factor(data$Sleep.Duration, levels = c(""'Less than 5 hours'"", ""'5-6 hours'"", ""'7-8 hours'""))"
+"0","data$Dietary.Habits <- factor(data$Dietary.Habits, levels = c(""Healthy"", ""Moderate""))"
+"0","data$Degree <- factor(data$Degree)"
+"0","data$Have.you.ever.had.suicidal.thoughts.. <- factor(data$Have.you.ever.had.suicidal.thoughts.., levels = c(""No"", ""Yes""))"
+"0","data$Family.History.of.Mental.Illness <- factor(data$Family.History.of.Mental.Illness, levels = c(""No"", ""Yes""))"
+"0",""
+"0","# Convert 'Financial.Stress' to numeric if it is in character format"
+"0","data$Financial.Stress <- as.numeric(data$Financial.Stress)"
+"2","Warning:"
+"2"," NAs introduced by coercion
+"

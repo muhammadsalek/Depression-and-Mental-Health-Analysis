@@ -1,0 +1,5 @@
+"0",""
+"0","# Display AUC in the legend"
+"0","legend(""bottomright"", legend = paste(""AUC ="", round(auc_value, 3)), "
+"0","       col = ""blue"", lwd = 2, cex = 1.2)"
+"0",""

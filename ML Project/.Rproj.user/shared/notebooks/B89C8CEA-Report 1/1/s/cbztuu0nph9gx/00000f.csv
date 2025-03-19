@@ -1,0 +1,51 @@
+"0","library(tidyverse)"
+"0","library(caret)"
+"0","library(randomForest)"
+"0","library(ggplot2)"
+"0","library(ggcorrplot)"
+"0","library(pROC)"
+"2","Type 'citation(""pROC"")' for a citation.
+"
+"2","
+Attaching package: ‘pROC’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    cov, smooth, var
+
+"
+"0","library(officer)"
+"0","library(flextable)"
+"2","Registered S3 methods overwritten by 'htmltools':
+  method               from         
+  print.html           tools:rstudio
+  print.shiny.tag      tools:rstudio
+  print.shiny.tag.list tools:rstudio
+"
+"2","Registered S3 method overwritten by 'rmarkdown':
+  method         from
+  print.paged_df     
+"
+"2","
+Attaching package: ‘flextable’
+
+"
+"2","The following object is masked from ‘package:purrr’:
+
+    compose
+
+"
+"0","library(knitr)"
+"0","library(gtsummary)"
+"2","
+Attaching package: ‘gtsummary’
+
+"
+"2","The following object is masked from ‘package:flextable’:
+
+    continuous_summary
+
+"
+"0","library(gt)"
+"0",""

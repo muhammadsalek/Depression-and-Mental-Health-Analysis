@@ -1,0 +1,2 @@
+"0","confusion_matrix <- table(Predicted = predicted_class_clean, Actual = data_clean$Depression)"
+"0","as.data.frame(confusion_matrix)"

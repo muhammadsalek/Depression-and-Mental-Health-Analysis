@@ -1,0 +1,307 @@
+---
+title: "Depression and Mental Health Analysis"
+author: 
+  - name: "MD Salek Miah"
+  - github: "https://github.com/muhammadsalek"  # Replace with your GitHub URL
+  - linkedin: "www.linkedin.com/in/md-salek-miah-b34309329"  # Replace with your LinkedIn URL
+output: html_document
+---
+
+```{r}
+#### Install necessary libraries if not installed####
+list.of.packages <- c("tidyverse", "caret", "randomForest", "ggplot2")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+install.packages("ggcorrplot")
+
+#### Load necessary libraries####
+library(tidyverse)
+library(caret)
+library(randomForest)
+library(ggplot2)
+library(ggcorrplot)
+
+```
+
+## Load necessary libraries
+
+```{r}
+library(tidyverse)
+library(caret)
+library(randomForest)
+library(ggplot2)
+library(ggcorrplot)
+library(pROC)
+library(officer)
+library(flextable)
+library(knitr)
+library(gtsummary)
+library(gt)
+
+```
+
+## Load dataset
+
+```{r}
+data <- read.csv("E:\\Kaggle\\Dataset\\archive\\student_depression_dataset.csv")
+
+# View dataset structure
+str(data)
+
+# Summary statistics
+summary(data)
+
+# Check for missing values
+sum(is.na(data))
+
+# Handle missing values (if any)
+data <- na.omit(data)
+
+```
+
+## Convert categorical variables to factors
+
+```{r}
+data$Gender <- factor(data$Gender, levels = c("Male", "Female"))
+data$Sleep.Duration <- factor(data$Sleep.Duration, levels = c("'Less than 5 hours'", "'5-6 hours'", "'7-8 hours'"))
+data$Dietary.Habits <- factor(data$Dietary.Habits, levels = c("Healthy", "Moderate"))
+data$Degree <- factor(data$Degree)
+data$Have.you.ever.had.suicidal.thoughts.. <- factor(data$Have.you.ever.had.suicidal.thoughts.., levels = c("No", "Yes"))
+data$Family.History.of.Mental.Illness <- factor(data$Family.History.of.Mental.Illness, levels = c("No", "Yes"))
+
+# Convert 'Financial.Stress' to numeric if it is in character format
+data$Financial.Stress <- as.numeric(data$Financial.Stress)
+
+```
+
+## Enhanced Distribution of Depression by Gender
+
+```{r}
+ggplot(data, aes(x = Gender, fill = factor(Depression))) +
+  geom_bar(position = "fill", width = 0.7) +
+  labs(
+    title = "Distribution of Depression by Gender", 
+    x = "Gender", 
+    y = "Proportion of Individuals"
+  ) +
+  scale_fill_manual(values = c("lightblue", "salmon"), labels = c("No", "Yes")) +
+  theme_minimal(base_size = 15) +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5)
+  )
+
+```
+
+## Enhanced Correlation Heatmap
+
+```{r}
+correlation_matrix <- cor(data %>% select_if(is.numeric))
+ggcorrplot(correlation_matrix, 
+           lab = TRUE, 
+           type = "lower", 
+           colors = c("red", "white", "blue"),
+           lab_size = 4, 
+           title = "Correlation Heatmap of Numerical Variables") +
+  theme_minimal(base_size = 15) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    axis.text.y = element_text(face = "italic"),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5)
+  )
+
+```
+
+## Boxplot of Age vs Sleep Duration
+
+```{r}
+ggplot(data, aes(x = Sleep.Duration, y = Age, fill = Sleep.Duration)) +
+  geom_boxplot() +
+  labs(
+    title = "Age Distribution by Sleep Duration", 
+    x = "Sleep Duration", 
+    y = "Age"
+  ) +
+  scale_fill_manual(values = c("lightblue", "lightgreen", "lightpink")) +
+  theme_minimal(base_size = 15) +
+  theme(
+    legend.title = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5)
+  )
+
+```
+
+## Depression vs Sleep Duration
+
+```{r}
+ggplot(data, aes(x = Sleep.Duration, fill = factor(Depression))) +
+  geom_bar(position = "fill", width = 0.7) +
+  labs(
+    title = "Depression vs Sleep Duration", 
+    x = "Sleep Duration", 
+    y = "Proportion of Individuals"
+  ) +
+  scale_fill_manual(values = c("lightblue", "salmon"), labels = c("No", "Yes")) +
+  theme_minimal(base_size = 15) +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    axis.title.x = element_text(face = "bold"),
+    axis.title.y = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5)
+  )
+
+```
+
+##n Logistic Regression Model
+
+```{r}
+# Fit logistic regression model (already done)
+logistic_model <- glm(Depression ~ Age + Gender + Sleep.Duration + Financial.Stress + CGPA, 
+                      data = data, 
+                      family = binomial(link = "logit"))
+
+# Generate predicted probabilities (probabilities of "Yes" class)
+predicted_probabilities <- predict(logistic_model, type = "response")
+
+# Generate predicted class labels by thresholding probabilities (e.g., threshold = 0.5)
+predicted_class <- ifelse(predicted_probabilities > 0.5, "Yes", "No")
+
+# Now you can use 'predicted_class' in your confusion matrix and model evaluation
+length(predicted_class)  # Check length
+length(data$Depression)  # Check length of actual values
+
+
+```
+
+```{r}
+data_clean <- data[!is.na(data$Depression), ]
+predicted_class_clean <- predicted_class[1:nrow(data_clean)]
+# Confusion Matrix
+table(Predicted = predicted_class_clean, Actual = data_clean$Depression)
+
+
+```
+
+## Model Evaluation and Confusion Matrix
+
+```{r}
+length(predicted_class)
+length(data$Depression)
+
+
+```
+
+```{r}
+# Subset data to include only rows where 'Depression' is not missing
+data_clean <- data[!is.na(data$Depression), ]
+
+# Ensure predicted_class aligns with the cleaned data
+predicted_class_clean <- predicted_class[1:nrow(data_clean)]
+
+# Create confusion matrix with the cleaned data
+table(Predicted = predicted_class_clean, Actual = data_clean$Depression)
+
+
+```
+
+```{r}
+# Model Performance: ROC Curve
+# Use cleaned data to match lengths
+roc_curve <- roc(data_clean$Depression, predicted_probabilities[1:nrow(data_clean)])
+
+# Calculate AUC (Area Under Curve)
+auc_value <- auc(roc_curve)
+
+# Plot ROC curve with enhanced features
+plot(roc_curve, 
+     col = "blue", 
+     lwd = 2, 
+     main = "ROC Curve for Logistic Regression Model", 
+     xlab = "False Positive Rate (FPR)", 
+     ylab = "True Positive Rate (TPR)", 
+     cex.main = 1.5, 
+     cex.lab = 1.2)
+grid()
+
+# Display AUC in the legend
+legend("bottomright", legend = paste("AUC =", round(auc_value, 3)), 
+       col = "blue", lwd = 2, cex = 1.2)
+
+```
+
+## Generate the Confusion Matrix Properly
+
+```{r}
+confusion_matrix <- table(Predicted = predicted_class_clean, Actual = data_clean$Depression)
+as.data.frame(confusion_matrix)
+
+```
+
+```{r}
+# Subset the data to remove missing values
+data_clean <- data[!is.na(data$Depression), ]
+
+# Ensure predicted_class matches the cleaned data length
+predicted_class_clean <- predicted_class[1:nrow(data_clean)]
+
+# Generate confusion matrix
+confusion_matrix <- table(Predicted = predicted_class_clean, Actual = data_clean$Depression)
+
+# Convert the confusion matrix to a data frame
+cm_data <- as.data.frame(confusion_matrix)
+
+# View the confusion matrix data frame
+print(cm_data)
+
+```
+
+```{r}
+names(cm_data)
+
+```
+
+## \## Confusion Matrix Visualization
+
+```{r}
+ggplot(cm_data, aes(x = Actual, y = Predicted, fill = Freq)) +
+  geom_tile() +
+  scale_fill_gradient(low = "white", high = "blue") +
+  geom_text(aes(label = Freq), color = "black", size = 5) +
+  labs(title = "Confusion Matrix", x = "Actual", y = "Predicted") +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 16))
+
+```
+
+## Save Model Coefficients to Word Document
+
+```{r}
+# Extract coefficients and their confidence intervals
+model_coefs <- summary(logistic_model)$coefficients
+
+# Convert the coefficients to a data.frame
+model_coefs_df <- as.data.frame(model_coefs)
+
+# Create flextable for model coefficients
+model_coefs_flextable <- flextable(model_coefs_df)
+
+# Create a Word document and add the table
+doc <- read_docx() %>%
+  body_add_flextable(model_coefs_flextable) %>%
+  body_add_par("Logistic Regression Coefficients with Confidence Intervals", style = "heading 1")
+
+# Save the Word document
+print(doc, target = "model_coefficients.docx")
+
+```
